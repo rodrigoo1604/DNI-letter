@@ -12,9 +12,9 @@ return new class extends Migration
     public function up()
     {
         Schema::create('dni_letters', function (Blueprint $table) {
-            $table->id(); // ID autoincremental
-            $table->integer('index')->unique(); // Índice del 0 al 22
-            $table->char('letter', 1); // Letra asociada
+            $table->id();
+            $table->integer('index')->unique();
+            $table->char('letter', 1);
             $table->timestamps();
         });
     }
