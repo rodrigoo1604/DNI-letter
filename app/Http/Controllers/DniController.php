@@ -16,15 +16,18 @@ class DniController extends Controller
         $dni = $validated['dni'];
         $index = $dni % 23;
 
-        $letter = DniLetter::table('dni_letters')->where('index', $index)->value('letter');
+        $letter = DniLetter::where('index', $index)->value('letter');
 
-        if ($letter) {
-            return response()->json([
-                'dni' => $dni,
-                'letter' => $letter,
-            ]);
+        if (!$letter) {
+            return response()->json(['error' => 'Letter not found'], 404);
         }
+
+        return response()->json([
+            'dni' => $dni,
+            'letter' => $letter,
+        ]);
 
         return response()->json(['error' => 'Letter cannot be calculated'], 500);
     }
+    
 }
