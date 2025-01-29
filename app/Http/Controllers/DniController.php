@@ -5,19 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\DniLetter;
 use Illuminate\Http\Request;
 
-use function PHPUnit\Framework\isInt;
-use function PHPUnit\Framework\isNumeric;
-
 class DniController extends Controller
 {
     public function calculateLetter(Request $request)
     {
 
-        $dni = $request['dni'];
+        $dni = $request->input('dni');
 
-        if ($dni.strlen($dni) != 8 || !isInt($dni) || $dni < 0 || $dni > 99999999) {
-            return "Introduce a valid dni";
-        }
+    if (!is_numeric($dni) || strlen($dni) !== 8 || $dni < 0 || $dni > 99999999) {
+        return response()->json(['error' => 'Insert a valid dni'], 400);
+    }
 
         $index = $dni % 23;
 
