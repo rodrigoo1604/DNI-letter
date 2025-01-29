@@ -5,15 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\DniLetter;
 use Illuminate\Http\Request;
 
+use function PHPUnit\Framework\isInt;
+use function PHPUnit\Framework\isNumeric;
+
 class DniController extends Controller
 {
     public function calculateLetter(Request $request)
     {
-        $validated = $request->validate([
-            'dni' => 'required|integer|between:0,99999999',
-        ]);
 
-        $dni = $validated['dni'];
+        $dni = $request['dni'];
+
+        if ($dni.strlen($dni) != 8 || !isInt($dni) || $dni < 0 || $dni > 99999999) {
+            return "Introduce a valid dni";
+        }
+
         $index = $dni % 23;
 
         $letter = DniLetter::where('index', $index)->value('letter');
@@ -26,8 +31,6 @@ class DniController extends Controller
             'dni' => $dni,
             'letter' => $letter,
         ]);
-
-        return response()->json(['error' => 'Letter cannot be calculated'], 500);
     }
     
 }
