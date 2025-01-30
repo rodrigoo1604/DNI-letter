@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\DniLetter;
 use Database\Seeders\DniLettersSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class DniTest extends TestCase
 {
@@ -14,47 +14,37 @@ class DniTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        // Seed the database with DNI letters
         $this->seed(DniLettersSeeder::class);
     }
 
     /** @test */
-    public function it_returns_the_correct_letter_for_a_valid_dni()
+    public function it_returns_an_error_if_dni_is_invalid()
     {
-        $dni = 12345678;
-        $expectedLetter = DniLetter::where('index', $dni % 23)->value('letter');
+        $response = $this->postJson('/api/calculate-dni-letter', ['dni' => "123"]);
+        
+        $response->assertStatus(400)
+                 ->assertJson(['error' => 'Insert a valid dni']);
+    }
 
-        $response = $this->postJson('/api/calculate-dni-letter', [
-            'dni' => $dni,
-        ]);
-
+    /** @test */
+    public function it_calculates_the_correct_letter()
+    {
+        $response = $this->postJson('/api/calculate-dni-letter', ['dni' => "12345678"]);
+        
         $response->assertStatus(200)
-            ->assertJson([
-                'dni' => $dni,
-                'letter' => $expectedLetter,
-            ]);
+                 ->assertJson([
+                     'dni' => "12345678",
+                     'letter' => DniLetter::where('index', 12345678 % 23)->value('letter'),
+                 ]);
     }
 
     /** @test */
-    public function it_returns_an_error_for_an_invalid_dni()
+    public function it_returns_an_error_if_dni_is_a_string()
     {
-        $response = $this->postJson('/api/calculate-dni-letter', [
-            'dni' => 'invalid-dni',
-        ]);
-
-        $response->assertStatus(422) // Unprocessable Entity
-            ->assertJsonValidationErrors(['dni']);
-    }
-
-    /** @test */
-    public function it_handles_dni_out_of_range()
-    {
-        $response = $this->postJson('/api/calculate-dni-letter', [
-            'dni' => 100000000, // Número fuera del rango permitido
-        ]);
-
-        $response->assertStatus(422) // Unprocessable Entity
-            ->assertJsonValidationErrors(['dni']);
+        $response = $this->postJson('/api/calculate-dni-letter', ['dni' => "invalidDNI"]);
+        
+        $response->assertStatus(400)
+                 ->assertJson(['error' => 'Insert a valid dni']);
     }
 }
+

@@ -12,9 +12,9 @@ class DniController extends Controller
 
         $dni = $request->input('dni');
 
-    if (!is_numeric($dni) || strlen($dni) !== 8 || $dni < 0 || $dni > 99999999) {
-        return response()->json(['error' => 'Insert a valid dni'], 400);
-    }
+        if (!is_numeric($dni) || strlen($dni) !== 8 || $dni < 0 || $dni > 99999999) {
+            return response()->json(['error' => 'Insert a valid dni'], 400);
+        }
 
         $index = $dni % 23;
 
